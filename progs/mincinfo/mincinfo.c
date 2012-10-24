@@ -132,7 +132,7 @@
 static char* exec_name;
 
 static char *type_names[] = {
-   NULL, "byte", "char", "short", "long", "float", "double"
+   NULL, "byte", "char", "short", "int", "float", "double", "long"
 };
 
 /* Types */
