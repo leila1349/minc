@@ -501,7 +501,8 @@ hdf_attinq(int fd, int varid, const char *attnm, nc_type *type_ptr,
   /* Special case - emulate the signtype attribute.
    */
   if (!strcmp(attnm, MIsigntype)) {
-      if (var != NULL && H5Tget_class(var->ftyp_id) == H5T_INTEGER) {
+    if (var != NULL && 
+	(H5Tget_class(var->ftyp_id) == H5T_INTEGER || H5Tget_class(var->ftyp_id) == H5T_ENUM)) {
           if (type_ptr != NULL) {
               *type_ptr = NC_CHAR;
           }
@@ -534,7 +535,7 @@ hdf_attinq(int fd, int varid, const char *attnm, nc_type *type_ptr,
       typ_size = H5Tget_size(typ_id);
 
       if (type_ptr != NULL) {
-	  if (typ_class == H5T_INTEGER) {
+	  if (typ_class == H5T_INTEGER || typ_class == H5T_ENUM) {
 	      if (typ_size == 1)
 		  *type_ptr = NC_BYTE;
 	      else if (typ_size == 2)
@@ -793,7 +794,7 @@ hdf_varinq(int fd, int varid, char *varnm_ptr, nc_type *type_ptr,
             H5Tclose(subtype_id);
         }
 #endif /* NO_EMULATE_VECTOR_DIMENSION */
-	if (class == H5T_INTEGER) {
+	if (class == H5T_INTEGER || class == H5T_ENUM) {
 	    if (size == 1)
 		*type_ptr = NC_BYTE;
 	    else if (size == 2)
@@ -847,7 +848,7 @@ hdf_varinq(int fd, int varid, char *varnm_ptr, nc_type *type_ptr,
         /* Emulate the signtype attribute for the image variable.
          */
         if (!strcmp(var->name, MIimage) &&
-            H5Tget_class(var->ftyp_id) == H5T_INTEGER) {
+            (H5Tget_class(var->ftyp_id) == H5T_INTEGER|| H5Tget_class(var->ftyp_id) == H5T_ENUM)) {
             natts++;
         }
 
@@ -994,6 +995,11 @@ hdf_attget(int fd, int varid, const char *attnm, void *value)
             }
             status = 1;         /* 1 -> success */
         }
+       if (H5Tget_class(var->ftyp_id) == H5T_ENUM) {
+          strcpy((char *) value, MI_UNSIGNED);
+          status = 1;          /* 1 -> success */
+
+       }
     }
     else if (!strcmp(attnm, MI_FillValue)) {
         hid_t plist_id = H5Dget_create_plist(loc_id);
